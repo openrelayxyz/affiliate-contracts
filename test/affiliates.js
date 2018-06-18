@@ -35,4 +35,30 @@ contract('AffiliateFactory', function(accounts) {
       assert.equal(res[2].toString(), web3.toWei(.4, "ether").toString());
     });
   });
+  it("Check whether an address is an affiliate.", function() {
+    var affiliateAddress;
+    return WETH9.deployed().then(() => {
+      return Affiliate.deployed();
+    }).then(() => {
+      return AffiliateFactory.new(Affiliate.address, WETH9.address, 20, 80);
+    }).then((af) => {
+      return Promise.all([
+        af.signUp([accounts[2], accounts[3]], [1, 1], {from: accounts[0]}),
+        af.signUp([accounts[2], accounts[3]], [1, 1], {from: accounts[0]}),
+        af.signUp([accounts[2], accounts[3]], [1, 1], {from: accounts[0]}),
+      ])
+    }).then((result) => {
+      var affiliateAddress = "0x" + result[0].receipt.logs[0].data.slice(26, 66);
+      var affiliate = Affiliate.at(affiliateAddress);
+      return Promise.all([
+        affiliate.isAffiliated.call("0x" + result[1].receipt.logs[0].data.slice(26, 66)),
+        affiliate.isAffiliated.call("0x" + result[2].receipt.logs[0].data.slice(26, 66)),
+        affiliate.isAffiliated.call(WETH9.address),
+      ]);
+    }).then((result) => {
+      assert(result[0]);
+      assert(result[1]);
+      assert(!result[2]);
+    });
+  });
 });
