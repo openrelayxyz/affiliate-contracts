@@ -61,4 +61,34 @@ contract('AffiliateFactory', function(accounts) {
       assert(!result[2]);
     });
   });
+  it("Register an affiliate as the owner with a custom arrangement", function() {
+    var affiliateAddress;
+    return WETH9.deployed().then(() => {
+      return Affiliate.deployed();
+    }).then(() => {
+      return AffiliateFactory.new(Affiliate.address, WETH9.address, 20, 80);
+    }).then((af) => {
+      return af.registerAffiliate([accounts[2], accounts[3]], [1, 1], {from: accounts[0]});
+    }).then((result) => {
+      var affiliateAddress = "0x" + result.receipt.logs[0].data.slice(26, 66);
+      var affiliate = Affiliate.at(affiliateAddress);
+      return affiliate.totalShares.call()
+    }).then((shares) => {
+      assert.equal(shares.toString(), "2");
+    })
+  })
+  it("Non-owners cannot sign up with a custom arrangement", function() {
+    var affiliateAddress;
+    return WETH9.deployed().then(() => {
+      return Affiliate.deployed();
+    }).then(() => {
+      return AffiliateFactory.new(Affiliate.address, WETH9.address, 20, 80);
+    }).then((af) => {
+      return af.registerAffiliate([accounts[2], accounts[3]], [1, 1], {from: accounts[1]});
+    }).then((result) => {
+      assert(false);
+    }).catch((shares) => {
+      //
+    })
+  })
 });
