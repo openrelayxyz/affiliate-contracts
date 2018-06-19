@@ -6,14 +6,14 @@ import './Affiliate.sol';
 
 contract AffiliateFactory is Ownable {
 
-    event AffiliateDeployed(address affiliateAddress, address targetAddress);
+    event AffiliateDeployed(address affiliateAddress, address targetAddress, string affiliateName);
 
     address public target;
     address public beneficiary;
     address public WETH;
     uint public beneficiaryStake;
     uint public senderStake;
-    mapping(address => bool) affiliates;
+    mapping(address => string) affiliates;
 
     constructor(address _target, address _weth, uint _beneficiaryStake, uint _senderStake) public Ownable() {
        update(_target, msg.sender, _weth, _beneficiaryStake, _senderStake);
@@ -27,7 +27,7 @@ contract AffiliateFactory is Ownable {
         WETH = _weth;
     }
 
-    function signUp(address[] _stakeHolders, uint256[] _stakes)
+    function signUp(address[] _stakeHolders, uint256[] _stakes, string _name)
         external
         returns (address affiliateContract)
     {
@@ -50,24 +50,29 @@ contract AffiliateFactory is Ownable {
           shares[i+1] = SafeMath.mul(_stakes[i], senderStake) / stakesTotal ;
         }
         require(Affiliate(affiliateContract).init(this, stakeHolders, shares, WETH));
-        affiliates[affiliateContract] = true;
-        emit AffiliateDeployed(affiliateContract, target);
+        affiliates[affiliateContract] = _name;
+        emit AffiliateDeployed(affiliateContract, target, _name);
     }
 
-    function registerAffiliate(address[] stakeHolders, uint[] shares)
+    function registerAffiliate(address[] stakeHolders, uint[] shares, string _name)
         external
         onlyOwner
         returns (address affiliateContract)
     {
         affiliateContract = createProxyImpl(target);
         require(Affiliate(affiliateContract).init(this, stakeHolders, shares, WETH));
-        affiliates[affiliateContract] = true;
-        emit AffiliateDeployed(affiliateContract, target);
+        affiliates[affiliateContract] = _name;
+        emit AffiliateDeployed(affiliateContract, target, _name);
     }
 
     function isAffiliated(address _affiliate) external view returns (bool)
     {
-        return affiliates[_affiliate];
+        return bytes(affiliates[_affiliate]).length != 0;
+    }
+
+    function affiliateName(address _affiliate) external view returns (string)
+    {
+      return affiliates[_affiliate];
     }
 
     function createProxyImpl(address _target)

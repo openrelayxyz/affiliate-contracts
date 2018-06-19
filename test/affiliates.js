@@ -10,7 +10,7 @@ contract('AffiliateFactory', function(accounts) {
     }).then(() => {
       return AffiliateFactory.new(Affiliate.address, WETH9.address, 20, 80);
     }).then((af) => {
-      return af.signUp([accounts[2], accounts[3]], [1, 1], {from: accounts[0]})
+      return af.signUp([accounts[2], accounts[3]], [1, 1], "Test", {from: accounts[0]})
     }).then((result) => {
       affiliateAddress = "0x" + result.receipt.logs[0].data.slice(26, 66);
       return web3.eth.sendTransaction({
@@ -43,9 +43,9 @@ contract('AffiliateFactory', function(accounts) {
       return AffiliateFactory.new(Affiliate.address, WETH9.address, 20, 80);
     }).then((af) => {
       return Promise.all([
-        af.signUp([accounts[2], accounts[3]], [1, 1], {from: accounts[0]}),
-        af.signUp([accounts[2], accounts[3]], [1, 1], {from: accounts[0]}),
-        af.signUp([accounts[2], accounts[3]], [1, 1], {from: accounts[0]}),
+        af.signUp([accounts[2], accounts[3]], [1, 1], "test", {from: accounts[0]}),
+        af.signUp([accounts[2], accounts[3]], [1, 1], "test", {from: accounts[0]}),
+        af.signUp([accounts[2], accounts[3]], [1, 1], "test", {from: accounts[0]}),
       ])
     }).then((result) => {
       var affiliateAddress = "0x" + result[0].receipt.logs[0].data.slice(26, 66);
@@ -68,7 +68,7 @@ contract('AffiliateFactory', function(accounts) {
     }).then(() => {
       return AffiliateFactory.new(Affiliate.address, WETH9.address, 20, 80);
     }).then((af) => {
-      return af.registerAffiliate([accounts[2], accounts[3]], [1, 1], {from: accounts[0]});
+      return af.registerAffiliate([accounts[2], accounts[3]], [1, 1], "test", {from: accounts[0]});
     }).then((result) => {
       var affiliateAddress = "0x" + result.receipt.logs[0].data.slice(26, 66);
       var affiliate = Affiliate.at(affiliateAddress);
@@ -84,7 +84,7 @@ contract('AffiliateFactory', function(accounts) {
     }).then(() => {
       return AffiliateFactory.new(Affiliate.address, WETH9.address, 20, 80);
     }).then((af) => {
-      return af.registerAffiliate([accounts[2], accounts[3]], [1, 1], {from: accounts[1]});
+      return af.registerAffiliate([accounts[2], accounts[3]], [1, 1], "test", {from: accounts[1]});
     }).then((result) => {
       assert(false);
     }).catch((shares) => {
