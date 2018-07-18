@@ -4,26 +4,32 @@ import 'zeppelin-solidity/contracts/ownership/Ownable.sol';
 import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 import './Affiliate.sol';
 
+interface Downstream {
+    function registerAffiliate(address _affiliate, string _name) external returns (bool);
+}
+
 contract AffiliateFactory is Ownable {
 
-    event AffiliateDeployed(address affiliateAddress, address targetAddress, string affiliateName);
+    event AffiliateDeployed(address affiliateAddress, address targetAddress, string affiliateName, address indexed sender);
 
     address public target;
     address public beneficiary;
     address public WETH;
+    address public downstream;
     uint public beneficiaryStake;
     uint public senderStake;
     mapping(address => string) affiliates;
 
-    constructor(address _target, address _weth, uint _beneficiaryStake, uint _senderStake) public Ownable() {
-       update(_target, msg.sender, _weth, _beneficiaryStake, _senderStake);
+    constructor(address _target, address _weth, uint _beneficiaryStake, uint _senderStake, address _downstream) public Ownable() {
+       update(_target, msg.sender, _weth, _beneficiaryStake, _senderStake, _downstream);
     }
 
-    function update(address _target, address _beneficiary, address _weth, uint _beneficiaryStake, uint _senderStake) public onlyOwner {
+    function update(address _target, address _beneficiary, address _weth, uint _beneficiaryStake, uint _senderStake, address _downstream) public onlyOwner {
         target = _target;
         beneficiary = _beneficiary;
         beneficiaryStake = _beneficiaryStake;
         senderStake = _senderStake;
+        downstream = _downstream;
         WETH = _weth;
     }
 
@@ -49,9 +55,12 @@ contract AffiliateFactory is Ownable {
           // (user stake) / (total stake) * (available stake) ; but with integer math
           shares[i+1] = SafeMath.mul(_stakes[i], senderStake) / stakesTotal ;
         }
-        require(Affiliate(affiliateContract).init(this, stakeHolders, shares, WETH));
+        require(Affiliate(affiliateContract).init(this, stakeHolders, shares, WETH, _name));
         affiliates[affiliateContract] = _name;
-        emit AffiliateDeployed(affiliateContract, target, _name);
+        emit AffiliateDeployed(affiliateContract, target, _name, msg.sender);
+        if(downstream != address(0)) {
+          Downstream(downstream).registerAffiliate(affiliateContract, _name);
+        }
     }
 
     function registerAffiliate(address[] stakeHolders, uint[] shares, string _name)
@@ -60,14 +69,17 @@ contract AffiliateFactory is Ownable {
         returns (address affiliateContract)
     {
         affiliateContract = createProxyImpl(target);
-        require(Affiliate(affiliateContract).init(this, stakeHolders, shares, WETH));
+        require(Affiliate(affiliateContract).init(this, stakeHolders, shares, WETH, _name));
         affiliates[affiliateContract] = _name;
-        emit AffiliateDeployed(affiliateContract, target, _name);
+        emit AffiliateDeployed(affiliateContract, target, _name, msg.sender);
+        if(downstream != address(0)) {
+          Downstream(downstream).registerAffiliate(affiliateContract, _name);
+        }
     }
 
     function isAffiliated(address _affiliate) external view returns (bool)
     {
-        return bytes(affiliates[_affiliate]).length != 0;
+      return bytes(affiliates[_affiliate]).length != 0;
     }
 
     function affiliateName(address _affiliate) external view returns (string)

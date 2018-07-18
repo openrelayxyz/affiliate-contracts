@@ -8,7 +8,7 @@ contract('AffiliateFactory', function(accounts) {
     return WETH9.deployed().then(() => {
       return Affiliate.deployed();
     }).then(() => {
-      return AffiliateFactory.new(Affiliate.address, WETH9.address, 20, 80);
+      return AffiliateFactory.new(Affiliate.address, WETH9.address, 20, 80, "");
     }).then((af) => {
       return af.signUp([accounts[2], accounts[3]], [1, 1], "Test", {from: accounts[0]})
     }).then((result) => {
@@ -40,7 +40,7 @@ contract('AffiliateFactory', function(accounts) {
     return WETH9.deployed().then(() => {
       return Affiliate.deployed();
     }).then(() => {
-      return AffiliateFactory.new(Affiliate.address, WETH9.address, 20, 80);
+      return AffiliateFactory.new(Affiliate.address, WETH9.address, 20, 80, "");
     }).then((af) => {
       return Promise.all([
         af.signUp([accounts[2], accounts[3]], [1, 1], "test", {from: accounts[0]}),
@@ -61,12 +61,11 @@ contract('AffiliateFactory', function(accounts) {
       assert(!result[2]);
     });
   });
-  it("Register an affiliate as the owner with a custom arrangement", function() {
     var affiliateAddress;
     return WETH9.deployed().then(() => {
       return Affiliate.deployed();
     }).then(() => {
-      return AffiliateFactory.new(Affiliate.address, WETH9.address, 20, 80);
+      return AffiliateFactory.new(Affiliate.address, WETH9.address, 20, 80, "");
     }).then((af) => {
       return af.registerAffiliate([accounts[2], accounts[3]], [1, 1], "test", {from: accounts[0]});
     }).then((result) => {
@@ -82,7 +81,7 @@ contract('AffiliateFactory', function(accounts) {
     return WETH9.deployed().then(() => {
       return Affiliate.deployed();
     }).then(() => {
-      return AffiliateFactory.new(Affiliate.address, WETH9.address, 20, 80);
+      return AffiliateFactory.new(Affiliate.address, WETH9.address, 20, 80, "");
     }).then((af) => {
       return af.registerAffiliate([accounts[2], accounts[3]], [1, 1], "test", {from: accounts[1]});
     }).then((result) => {

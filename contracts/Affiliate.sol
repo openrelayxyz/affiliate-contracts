@@ -1,4 +1,4 @@
-pragma solidity ^0.4.4;
+pragma solidity ^0.4.21;
 
 import 'zeppelin-solidity/contracts/math/SafeMath.sol';
 import 'zeppelin-solidity/contracts/token/ERC20/ERC20.sol';
@@ -16,12 +16,13 @@ contract Affiliate {
 
   Share[] shares;
   uint public totalShares;
+  string public relayerName;
   address registry;
   WETH9 weth;
 
   event Payout(address indexed token, uint amount);
 
-  function init(address _registry, address[] shareholders, uint[] stakes, address _weth) public returns (bool) {
+  function init(address _registry, address[] shareholders, uint[] stakes, address _weth, string _name) public returns (bool) {
     require(totalShares == 0);
     require(shareholders.length == stakes.length);
     weth = WETH9(_weth);
@@ -30,6 +31,7 @@ contract Affiliate {
         shares.push(Share({shareholder: shareholders[i], stake: stakes[i]}));
         totalShares += stakes[i];
     }
+    relayerName = _name;
     registry = _registry;
     return true;
   }
