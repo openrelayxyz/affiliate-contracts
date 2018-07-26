@@ -61,6 +61,7 @@ contract('AffiliateFactory', function(accounts) {
       assert(!result[2]);
     });
   });
+  it("Owners should be able to sign up with a custom arrangement", function() {
     var affiliateAddress;
     return WETH9.deployed().then(() => {
       return Affiliate.deployed();

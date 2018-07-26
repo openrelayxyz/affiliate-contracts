@@ -37,7 +37,7 @@ contract AffiliateFactory is Ownable {
         external
         returns (address affiliateContract)
     {
-        require(_stakeHolders.length > 0 && _stakeHolders.length == _stakes.length);
+        require(_stakeHolders.length > 0 && _stakeHolders.length == _stakes.length && bytes(_name).length > 0);
         affiliateContract = createProxyImpl(target);
         address[] memory stakeHolders = new address[](_stakeHolders.length + 1);
         uint[] memory shares = new uint[](stakeHolders.length);
@@ -68,6 +68,7 @@ contract AffiliateFactory is Ownable {
         onlyOwner
         returns (address affiliateContract)
     {
+        require(stakeHolders.length > 0 && stakeHolders.length == shares.length && bytes(_name).length > 0);
         affiliateContract = createProxyImpl(target);
         require(Affiliate(affiliateContract).init(this, stakeHolders, shares, WETH, _name));
         affiliates[affiliateContract] = _name;
